@@ -42,8 +42,7 @@ def generate_borders(image_path, target_color, tolerance=35):
     print("Merging borders")
 
     # Merge adjacent rects to form larger borders
-    #merged_borders = merge_rects(filtered_borders)
-    merged_borders = filtered_borders
+    merged_borders = merge_rects(filtered_borders)
 
     # Clean up
     del pixel_array
@@ -52,20 +51,32 @@ def generate_borders(image_path, target_color, tolerance=35):
     return merged_borders
 
 def merge_rects(rects):
-    # This function merges adjacent rects into larger rects
-    def merge_pair(rect):
-        merged_rect = rect
-        for other_rect in rects[:]:
-            if merged_rect.colliderect(other_rect):
-                merged_rect.union_ip(other_rect)
-                rects.remove(other_rect)
-        return merged_rect
+    # This function merges adjacent rects into larger rects that represent the same bounds
+    def merge_pair(rect1, rect2):
+        if not ((rect1[0], rect1[0] + rect1[2]) == (rect2[0], rect2[0] + rect2[2]) or
+                (rect1[1], rect1[1] + rect1[3]) == (rect2[1], rect2[1] + rect2[3])):
+            return None # Rects are not adjacent
+        
+        if not (rect1.inflate(1, 0).colliderect(rect2) or rect1.inflate(-1, 0).colliderect(rect2) or
+                rect1.inflate(0, 1).colliderect(rect2) or rect1.inflate(0, -1).colliderect(rect2)):
+            return None          
+
+        return rect1.union(rect2)
 
     merged = []
-    with ThreadPoolExecutor(max_workers=max(1, os.cpu_count() - 1)) as executor:
-        futures = [executor.submit(merge_pair, rect) for rect in rects]
-        for future in futures:
-            merged.append(future.result())
+    while rects:
+        rect = rects.pop(0)
+        merged_rect = rect
+        i = 0
+        while i < len(rects):
+            other_rect = rects[i]
+            new_rect = merge_pair(merged_rect, other_rect)
+            if new_rect:
+                merged_rect = new_rect
+                rects.pop(i)
+            else:
+                i += 1
+        merged.append(merged_rect)
     return merged
 
 def filter_isolated_rects(rects, max_distance=3):
