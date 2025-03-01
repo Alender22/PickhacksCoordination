@@ -1,6 +1,7 @@
 import pygame
 import sys
 from tkinter import Tk, filedialog
+from concurrent.futures import ThreadPoolExecutor
 
 def generate_borders(image_path, target_color, tolerance=35):
     # Initialize Pygame
@@ -16,23 +17,33 @@ def generate_borders(image_path, target_color, tolerance=35):
     # List to store the borders
     borders = []
 
-    # Scan the image for the target color within the tolerance range
-    for y in range(image_rect.height):
+    def process_row(y):
+        row_borders = []
         for x in range(image_rect.width):
             pixel_color = image.unmap_rgb(pixel_array[x, y])
             if all(abs(pixel_color[i] - target_color[i]) <= tolerance for i in range(3)):
                 # Create a rect for the block of the target color
                 rect = pygame.Rect(x, y, 1, 1)
-                borders.append(rect)
+                row_borders.append(rect)
+        return row_borders
+
+    # Use ThreadPoolExecutor to process rows in parallel
+    with ThreadPoolExecutor() as executor:
+        results = executor.map(process_row, range(image_rect.height))
+        for row_borders in results:
+            borders.extend(row_borders)
 
     # Merge adjacent rects to form larger borders
     merged_borders = merge_rects(borders)
+
+    # Filter out isolated rects
+    filtered_borders = filter_isolated_rects(merged_borders)
 
     # Clean up
     del pixel_array
     pygame.quit()
 
-    return merged_borders
+    return filtered_borders
 
 def merge_rects(rects):
     # This function merges adjacent rects into larger rects
@@ -46,6 +57,20 @@ def merge_rects(rects):
                 rects.remove(other_rect)
         merged.append(merged_rect)
     return merged
+
+def filter_isolated_rects(rects, sep=3):
+    # This function filters out rects that are isolated by more than max_distance rects
+    filtered = []
+    for rect in rects:
+        neighbors = 0
+        for other_rect in rects:
+            if rect != other_rect and ( -sep < rect[0] - other_rect[0] < sep and -sep < rect[1] - other_rect[1] < sep): #and (rect.colliderect(other_rect.inflate(max_distance, max_distance) or rect.inflate(max_distance, max_distance).colliderect(other_rect))):
+                neighbors += 1
+                if neighbors >= (sep*2)**2:
+                    break
+        if neighbors < (sep*2)**2:
+            filtered.append(rect)
+    return filtered
 
 def pick_color_from_image(image_path):
     # Initialize Pygame

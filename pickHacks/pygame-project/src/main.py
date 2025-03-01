@@ -20,6 +20,14 @@ pygame.display.set_caption("Move the Red Circle")
 background_image = pygame.image.load('images/sntMap-01.png')
 background_rect = background_image.get_rect()
 
+# Define borders as a list of pygame.Rect objects
+borders = [
+    pygame.Rect(100, 100, 600, 10),  # Top border
+    pygame.Rect(100, 490, 600, 10),  # Bottom border
+    pygame.Rect(100, 100, 10, 400),  # Left border
+    pygame.Rect(690, 100, 10, 400)   # Right border
+]
+
 # Initial position of the circle
 x, y = WIDTH // 2, HEIGHT // 2
 
@@ -38,25 +46,29 @@ while running:
 
     keys = pygame.key.get_pressed()
     if keys[pygame.K_w]:
-        if bg_y < 0 and y - VELOCITY < HEIGHT // 2:
+        new_y = y - VELOCITY
+        if bg_y < 0 and new_y < HEIGHT // 2:
             bg_y += VELOCITY
         else:
-            y -= VELOCITY
+            y = new_y
     if keys[pygame.K_s]:
-        if bg_y > HEIGHT - background_rect.height and y + VELOCITY > HEIGHT // 2:
+        new_y = y + VELOCITY
+        if bg_y > HEIGHT - background_rect.height and new_y > HEIGHT // 2:
             bg_y -= VELOCITY
         else:
-            y += VELOCITY
+            y = new_y
     if keys[pygame.K_a]:
-        if bg_x < 0 and x - VELOCITY < WIDTH // 2:
+        new_x = x - VELOCITY
+        if bg_x < 0 and new_x < WIDTH // 2:
             bg_x += VELOCITY
         else:
-            x -= VELOCITY
+            x = new_x
     if keys[pygame.K_d]:
-        if bg_x > WIDTH - background_rect.width and x + VELOCITY > WIDTH // 2:
+        new_x = x + VELOCITY
+        if bg_x > WIDTH - background_rect.width and new_x > WIDTH // 2:
             bg_x -= VELOCITY
         else:
-            x += VELOCITY
+            x = new_x
 
     # Ensure the circle stays within the window bounds
     x = max(RADIUS, min(WIDTH - RADIUS, x))
@@ -72,8 +84,27 @@ while running:
     if not (bg_y == 0 or bg_y == HEIGHT - background_rect.height):
         y = HEIGHT // 2
 
+    # Check for collisions with borders
+    circle_rect = pygame.Rect(x - RADIUS, y - RADIUS, RADIUS * 2, RADIUS * 2)
+    for border in borders:
+        adjusted_border = border.move(bg_x, bg_y)
+        if circle_rect.colliderect(adjusted_border):
+            if keys[pygame.K_w]:
+                y += VELOCITY
+            if keys[pygame.K_s]:
+                y -= VELOCITY
+            if keys[pygame.K_a]:
+                x += VELOCITY
+            if keys[pygame.K_d]:
+                x -= VELOCITY
+
     # Draw the background image
     screen.blit(background_image, (bg_x, bg_y))
+
+    # Draw the borders
+    for border in borders:
+        adjusted_border = border.move(bg_x, bg_y)
+        pygame.draw.rect(screen, BLACK, adjusted_border)
 
     # Draw the red circle
     screen_x = x
