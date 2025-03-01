@@ -2,6 +2,7 @@ import pygame
 import sys
 from tkinter import Tk, filedialog
 from concurrent.futures import ThreadPoolExecutor
+import os
 
 def generate_borders(image_path, target_color, tolerance=35):
     # Initialize Pygame
@@ -17,59 +18,73 @@ def generate_borders(image_path, target_color, tolerance=35):
     # List to store the borders
     borders = []
 
-    def process_row(y):
-        row_borders = []
-        for x in range(image_rect.width):
-            pixel_color = image.unmap_rgb(pixel_array[x, y])
-            if all(abs(pixel_color[i] - target_color[i]) <= tolerance for i in range(3)):
-                # Create a rect for the block of the target color
-                rect = pygame.Rect(x, y, 1, 1)
-                row_borders.append(rect)
-        return row_borders
+    print("Scanning for colors")
 
-    # Use ThreadPoolExecutor to process rows in parallel
-    with ThreadPoolExecutor() as executor:
-        results = executor.map(process_row, range(image_rect.height))
-        for row_borders in results:
-            borders.extend(row_borders)
+    def process_pixel(x, y):
+        pixel_color = image.unmap_rgb(pixel_array[x, y])
+        if all(abs(pixel_color[i] - target_color[i]) <= tolerance for i in range(3)):
+            return pygame.Rect(x, y, 1, 1)
+        return None
 
-    # Merge adjacent rects to form larger borders
-    merged_borders = merge_rects(borders)
+    # Use ThreadPoolExecutor to process pixels in parallel
+    with ThreadPoolExecutor(max_workers=max(1, os.cpu_count() - 1)) as executor:
+        futures = [executor.submit(process_pixel, x, y) for y in range(image_rect.height) for x in range(image_rect.width)]
+        for future in futures:
+            rect = future.result()
+            if rect:
+                borders.append(rect)
+
+    print("Filtering borders")
 
     # Filter out isolated rects
-    filtered_borders = filter_isolated_rects(merged_borders)
+    filtered_borders = filter_isolated_rects(borders)
+
+    print("Merging borders")
+
+    # Merge adjacent rects to form larger borders
+    merged_borders = merge_rects(filtered_borders)
 
     # Clean up
     del pixel_array
     pygame.quit()
 
-    return filtered_borders
+    return merged_borders
 
 def merge_rects(rects):
     # This function merges adjacent rects into larger rects
-    merged = []
-    while rects:
-        rect = rects.pop(0)
+    def merge_pair(rect):
         merged_rect = rect
         for other_rect in rects[:]:
             if merged_rect.colliderect(other_rect):
                 merged_rect.union_ip(other_rect)
                 rects.remove(other_rect)
-        merged.append(merged_rect)
+        return merged_rect
+
+    merged = []
+    with ThreadPoolExecutor(max_workers=max(1, os.cpu_count() - 1)) as executor:
+        futures = [executor.submit(merge_pair, rect) for rect in rects]
+        for future in futures:
+            merged.append(future.result())
     return merged
 
-def filter_isolated_rects(rects, sep=3):
-    # This function filters out rects that are isolated by more than max_distance rects
-    filtered = []
-    for rect in rects:
-        neighbors = 0
-        for other_rect in rects:
-            if rect != other_rect and ( -sep < rect[0] - other_rect[0] < sep and -sep < rect[1] - other_rect[1] < sep): #and (rect.colliderect(other_rect.inflate(max_distance, max_distance) or rect.inflate(max_distance, max_distance).colliderect(other_rect))):
-                neighbors += 1
-                if neighbors >= (sep*2)**2:
-                    break
-        if neighbors < (sep*2)**2:
-            filtered.append(rect)
+def filter_isolated_rects(rects, max_distance=3):
+    # This function filters out rects that are completely surrounded by other rects within max_distance
+    def is_surrounded(rect):
+        directions = [
+            (max_distance, 0), (-max_distance, 0), (0, max_distance), (0, -max_distance),
+            (max_distance, max_distance), (max_distance, -max_distance),
+            (-max_distance, max_distance), (-max_distance, -max_distance)
+        ]
+        for dx, dy in directions:
+            neighbor_rect = rect.move(dx, dy)
+            if not any(neighbor_rect.colliderect(other_rect) for other_rect in rects if other_rect != rect):
+                return False
+        return True
+
+    with ThreadPoolExecutor(max_workers=max(1, os.cpu_count() - 1)) as executor:
+        results = list(executor.map(is_surrounded, rects))
+
+    filtered = [rect for rect, surrounded in zip(rects, results) if not surrounded]
     return filtered
 
 def pick_color_from_image(image_path):
