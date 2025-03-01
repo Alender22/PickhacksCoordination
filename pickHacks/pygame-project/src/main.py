@@ -1,6 +1,14 @@
 import pygame
 import sys
 
+def load_borders_from_file(file_path):
+    borders = []
+    with open(file_path, 'r') as file:
+        for line in file:
+            x, y, width, height = map(int, line.strip().split(','))
+            borders.append(pygame.Rect(x, y, width, height))
+    return borders
+
 # Initialize Pygame
 pygame.init()
 
@@ -20,13 +28,8 @@ pygame.display.set_caption("Move the Red Circle")
 background_image = pygame.image.load('images/sntMap-01.png')
 background_rect = background_image.get_rect()
 
-# Define borders as a list of pygame.Rect objects
-borders = [
-    pygame.Rect(100, 100, 600, 10),  # Top border
-    pygame.Rect(100, 490, 600, 10),  # Bottom border
-    pygame.Rect(100, 100, 10, 400),  # Left border
-    pygame.Rect(690, 100, 10, 400)   # Right border
-]
+# Load borders from file
+borders = load_borders_from_file('src/mapBoundaries-Buildings.txt')
 
 # Initial position of the circle
 x, y = WIDTH // 2, HEIGHT // 2
