@@ -1,6 +1,7 @@
 import pygame
 import sys
 import pushpuzzle
+import colorpuzzle
 
 def load_borders_from_files(file_paths):
     borders = []
@@ -25,6 +26,8 @@ def load_activation_areas(file_paths):
 def switch_to_another_game(game):
     if game == 'pushpuzzle':
         pushpuzzle.main()
+    if game == "colorpuzzle":
+        colorpuzzle.main()
     # Add more games here as needed
     else:
         print(f"Unknown game: {game}")
@@ -65,7 +68,8 @@ background_rect = background_image.get_rect()
 
 # List of border files
 border_files = ['src/mapBoundaries-Buildings.txt']
-activation_files = [('src/activationAreaHavener.txt', 'pushpuzzle')]
+activation_files = [('src/activationAreaHavener.txt', 'pushpuzzle'),
+                    ('src/activationAreaCompSci.txt', 'colorpuzzle')]
 # Add more border files as needed
 
 # Load borders from files
