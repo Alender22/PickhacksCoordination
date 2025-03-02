@@ -1,11 +1,11 @@
 import pygame
 
-
+player_response = ""
 import sys
 import os
 import google.generativeai as genai
 
-GOOGLE_API_KEY = os.environ.get("GOOGLE_API_KEY")
+GOOGLE_API_KEY ="AIzaSyBPUqamTRlLML-StfldgH2G2NuzKkd-KbU"
 if not GOOGLE_API_KEY:
     raise ValueError("Please set the GOOGLE_API_KEY environment variable")
 
@@ -20,7 +20,7 @@ WIDTH, HEIGHT = 800, 600
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("NPC Chatbot")
 
-# Colors
+# Colors i
 WHITE = (255, 255, 255)
 CHAOS = (0, 175, 0)
 BLACK = (0, 0, 0)
@@ -39,13 +39,14 @@ font = pygame.font.Font(None, 36)
 
 # Chatbot state
 chat_active = False
+npc_message = ""
+player_response = " "
 while player_response != "n":
     def get_npc_response(player_input):
         response = model.generate(prompt=player_input)
         return response['text']
-'''npc_message = "Greetings, I am The Ghost Miner"
-player_response = input("Add response here: ")
-while player_response != "n":
+
+'''while player_response != "n":
     npc_message = " "
     npc_message = "would you like to say anything else (y/n)?"
     player_response = input(" ")
