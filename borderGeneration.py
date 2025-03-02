@@ -4,7 +4,7 @@ from tkinter import Tk, filedialog
 from concurrent.futures import ThreadPoolExecutor
 import os
 
-def generate_borders(image_path, target_color, tolerance=35):
+def generate_borders(image_path, target_color, tolerance=5):
     # Initialize Pygame
     pygame.init()
 
@@ -37,12 +37,13 @@ def generate_borders(image_path, target_color, tolerance=35):
     print("Filtering borders")
 
     # Filter out isolated rects
-    filtered_borders = filter_isolated_rects(borders, 1)
+    filtered_borders = filter_isolated_rects(borders, 3)
 
     print("Merging borders")
 
     # Merge adjacent rects to form larger borders
-    merged_borders = merge_rects(filtered_borders)
+    # merged_borders = merge_rects(filtered_borders)
+    merged_borders = filtered_borders
 
     # Clean up
     del pixel_array
