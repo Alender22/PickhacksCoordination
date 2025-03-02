@@ -105,38 +105,37 @@ class PushPuzzle:
         return False
 
 # Example usage
+grids = [
+    [
+        "##########",
+        "#        #",
+        "#P     B #",
+        "## B     #",
+        "#Y    Y  #",
+        "##########"
+    ],
+    [
+        "##########",
+        "#P       #",
+        "#     #B #",
+        "#    #   #",
+        "#    B   #",
+        "#        #",
+        "# Y#Y    #",
+        "##########"
+    ],
+    [
+        "###########",
+        "#         #",
+        "#    B    #",
+        "#    #    #",
+        "# #       #",
+        "#      Y#P#",
+        "###########"
+    ]
+]
 
 def main():
-
-    grids = [
-        [
-            "##########",
-            "#        #",
-            "#P     B #",
-            "## B     #",
-            "#Y    Y  #",
-            "##########"
-        ],
-        [
-            "##########",
-            "#P       #",
-            "#     #B #",
-            "#    #   #",
-            "#    B   #",
-            "#        #",
-            "# Y#Y    #",
-            "##########"
-        ],
-        [
-            "###########",
-            "#         #",
-            "#    B    #",
-            "#    #    #",
-            "# #       #",
-            "#      Y#P#",
-            "###########"
-        ]
-    ]
 
     puzzle = PushPuzzle([[list(row) for row in grid] for grid in grids])
 
@@ -206,9 +205,9 @@ def main():
             if not puzzle.next_grid():
                 running = False
 
-    if __name__ == '__main__':
+    if __name__ == "__main__":
         pygame.quit()
         sys.exit()
 
-if __name__ == '__main__':
-    main()
+if __name__ == "__main__":
+    main()                      
