@@ -20,16 +20,16 @@ def main():
 
     while not END_FLAG:
         prompt = input("Your input: ")
-        getGeminiResponse(prompt)
+        getGeminiResponse(context, prompt)
 
-def getGeminiResponse(prompt):
+def getGeminiResponse(context, prompt):
     global CHARACTER_COUNT
     global THRESHOLD
     global END_FLAG
 
     CHARACTER_COUNT += len(prompt)
     if CHARACTER_COUNT > THRESHOLD:
-        prompt = f"The user asked{prompt}. For the story setting, you are now out of time and need to leave after giving the final question a brief answer"
+        prompt = f"The context of the setting is[{context}]. The user asked{prompt}. For the story setting, you are now out of time and need to leave after giving the final question a brief answer"
 
         END_FLAG = True
 
