@@ -1,5 +1,6 @@
 import pygame
 import sys
+import pushpuzzle
 
 def load_borders_from_files(file_paths):
     borders = []
@@ -10,46 +11,21 @@ def load_borders_from_files(file_paths):
                 borders.append(pygame.Rect(x, y, width, height))
     return borders
 
+def switch_to_another_game():
+    pushpuzzle.main()
+
 def check_collision_and_switch(rects, circle_rect, bg_x, bg_y):
+    global activation_hit
     for rect in rects:
         adjusted_rect = rect.move(bg_x, bg_y)
         if circle_rect.colliderect(adjusted_rect):
-            print("Collision detected! Switching to a different game...")
-            switch_to_another_game()
+            if not activation_hit:
+                print("Collision detected! Switching to a different game...")
+                switch_to_another_game()
+                activation_hit = True
             return True
+    activation_hit = False
     return False
-
-def switch_to_another_game():
-    # Initialize Pygame for the secondary game
-    pygame.init()
-
-    # Constants for the secondary game
-    WIDTH, HEIGHT = 800, 600
-    BLUE = (0, 0, 255)
-    WHITE = (255, 255, 255)
-
-    # Set up the display for the secondary game
-    screen = pygame.display.set_mode((WIDTH, HEIGHT))
-    pygame.display.set_caption("Secondary Game")
-
-    # Main loop for the secondary game
-    running = True
-    while running:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                running = False
-
-        # Fill the screen with blue color
-        screen.fill(BLUE)
-
-        # Update the display
-        pygame.display.flip()
-
-        # Cap the frame rate
-        pygame.time.Clock().tick(60)
-
-    # Quit Pygame for the secondary game
-    pygame.quit()
 
 # Initialize Pygame
 pygame.init()
@@ -84,6 +60,8 @@ x, y = WIDTH // 2, HEIGHT // 2
 # Initial position of the background
 bg_x, bg_y = 0, 0
 
+activation_hit = False
+
 # Main game loop
 running = True
 while running:
@@ -95,6 +73,8 @@ while running:
             screen = pygame.display.set_mode((WIDTH, HEIGHT), pygame.RESIZABLE)
 
     keys = pygame.key.get_pressed()
+    if keys[pygame.K_q]:
+        running = False
     if keys[pygame.K_w]:
         new_y = y - VELOCITY
         if bg_y < 0 and new_y < HEIGHT // 2:
@@ -149,8 +129,7 @@ while running:
                 x -= VELOCITY
 
     # Check for collisions with activation areas and switch game if needed
-    if check_collision_and_switch(activation_areas, circle_rect, bg_x, bg_y):
-        running = False
+    check_collision_and_switch(activation_areas, circle_rect, bg_x, bg_y)
 
     # Draw the background image
     screen.blit(background_image, (bg_x, bg_y))
