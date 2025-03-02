@@ -3,6 +3,7 @@ import sys
 import pushpuzzle
 import colorpuzzle
 import npcConversation
+import etchASketch
 
 def load_borders_from_files(file_paths):
     borders = []
@@ -31,6 +32,8 @@ def switch_to_another_game(game):
         colorpuzzle.main()
     if game == "npcConversation":
         npcConversation.main()
+    if game == "etchASketch":
+        etchASketch.main()
     # Add more games here as needed
     else:
         print(f"Unknown game: {game}")
@@ -73,7 +76,8 @@ background_rect = background_image.get_rect()
 border_files = ['src/mapBoundaries-Buildings.txt']
 activation_files = [('src/activationAreaHavener.txt', 'pushpuzzle'),
                     ('src/activationAreaCompSci.txt', 'colorpuzzle'),
-                    ('src/activationAreaMcNut.txt', 'npcConversation')]
+                    ('src/activationAreaMcNut.txt', 'npcConversation'),
+                    ('src/inoBorders.txt', 'etchASketch')]
 # Add more border files as needed
 
 # Load borders from files

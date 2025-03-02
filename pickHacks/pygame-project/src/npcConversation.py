@@ -1,5 +1,5 @@
 from google import genai
-client = genai.Client(api_key="")
+client = genai.Client(api_key="AIzaSyBlOSTfzr2eNn6CnlNnMEheqpdrUyzP_CI")
 
 CHARACTER_COUNT = 0
 THRESHOLD = 1500
