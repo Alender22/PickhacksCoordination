@@ -5,7 +5,7 @@ import sys
 import os
 import google.generativeai as genai
 
-GOOGLE_API_KEY ="AIzaSyBPUqamTRlLML-StfldgH2G2NuzKkd-KbU"
+GOOGLE_API_KEY =""
 if not GOOGLE_API_KEY:
     raise ValueError("Please set the GOOGLE_API_KEY environment variable")
 
@@ -42,10 +42,13 @@ chat_active = False
 npc_message = ""
 player_response = " "
 while player_response != "n":
-    def get_npc_response(player_input):
-        response = model.generate(prompt=player_input)
+    npc_message = "What would you like to say?" 
+    player_response = input(" ")
+    def get_npc_response(player_response):
+        response = model.generate(prompt=player_response)
         return response['text']
-
+    npc_message = "Would you like to say anything else (y/n)?"
+    player_response = input(" ")
 '''while player_response != "n":
     npc_message = " "
     npc_message = "would you like to say anything else (y/n)?"
