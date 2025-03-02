@@ -76,54 +76,60 @@ class ColorPuzzle:
                     self.square_locations.pop(i)
                 break
 
-# Main game loop
-puzzle = ColorPuzzle()
 
-running = True
-while running:
-    for event in pygame.event.get():
-       if event.type == pygame.QUIT:
-            running = False
+def main():
+    # Main game loop
+    puzzle = ColorPuzzle()
 
-    # Fill the screen with white
-    screen.fill(WHITE)
+    running = True
+    while running:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                    running = False
 
-    # Update and draw the puzzle
-    puzzle.update()
+        # Fill the screen with white
+        screen.fill(WHITE)
 
-    # Update the display
-    pygame.display.flip()
+        # Update and draw the puzzle
+        puzzle.update()
 
-    # Cap the frame rate
-    pygame.time.Clock().tick(60)
+        # Update the display
+        pygame.display.flip()
 
-    puzzle.shuffle_colors()
+        # Cap the frame rate
+        pygame.time.Clock().tick(60)
 
-running = True
-while running:
-    for event in pygame.event.get():
-       if event.type == pygame.QUIT:
-            running = False
+        puzzle.shuffle_colors()
 
-    keys = pygame.key.get_pressed()
-    if keys[pygame.K_w]:
-        puzzle.y -= VELOCITY
-    if keys[pygame.K_s]:
-        puzzle.y += VELOCITY
-    if keys[pygame.K_a]:
-        puzzle.x -= VELOCITY
-    if keys[pygame.K_d]:
-        puzzle.x += VELOCITY
+    running = True
+    while running:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                    running = False
 
-    puzzle.x = max(RADIUS, min(WIDTH - RADIUS, puzzle.x))
-    puzzle.y = max(RADIUS, min(HEIGHT - RADIUS, puzzle.y))
-    
-    puzzle.check_collision()
-    puzzle.draw_color_history()
+        keys = pygame.key.get_pressed()
+        if keys[pygame.K_w]:
+            puzzle.y -= VELOCITY
+        if keys[pygame.K_s]:
+            puzzle.y += VELOCITY
+        if keys[pygame.K_a]:
+            puzzle.x -= VELOCITY
+        if keys[pygame.K_d]:
+            puzzle.x += VELOCITY
 
-    pygame.display.flip()
-    pygame.time.Clock().tick(60)
+        puzzle.x = max(RADIUS, min(WIDTH - RADIUS, puzzle.x))
+        puzzle.y = max(RADIUS, min(HEIGHT - RADIUS, puzzle.y))
+        
+        puzzle.check_collision()
+        puzzle.draw_color_history()
 
-# Quit Pygame
-pygame.quit()
-sys.exit()
+        pygame.display.flip()
+        pygame.time.Clock().tick(60)
+
+    if puzzle.shuffled == []:
+        # Quit Pygame
+        pygame.quit()
+        sys.exit()
+
+if __name__ == "__main__":
+    main()
