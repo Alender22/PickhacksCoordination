@@ -11,17 +11,34 @@ def load_borders_from_files(file_paths):
                 borders.append(pygame.Rect(x, y, width, height))
     return borders
 
-def switch_to_another_game():
-    pushpuzzle.main()
+def load_activation_areas(file_paths):
+    # file_paths is an array of tuples, (file_path, game), where game is the name of the game to switch to
+    activation_areas = {}
+    for file_path in file_paths:
+        game = file_path[1]
+        with open(file_path[0], 'r') as file:
+            for line in file:
+                x, y, width, height = line.strip().split(',')
+                activation_areas[f"{x}-{y}-{width}-{height}"] = game
+    return activation_areas
 
-def check_collision_and_switch(rects, circle_rect, bg_x, bg_y):
+def switch_to_another_game(game):
+    if game == 'pushpuzzle':
+        pushpuzzle.main()
+    # Add more games here as needed
+    else:
+        print(f"Unknown game: {game}")
+
+def check_collision_and_switch(activation_areas, circle_rect, bg_x, bg_y):
     global activation_hit
-    for rect in rects:
+    for key, game in activation_areas.items():
+        x, y, width, height = map(int, key.split('-'))
+        rect = pygame.Rect(x, y, width, height)
         adjusted_rect = rect.move(bg_x, bg_y)
         if circle_rect.colliderect(adjusted_rect):
             if not activation_hit:
-                print("Collision detected! Switching to a different game...")
-                switch_to_another_game()
+                print(f"Collision detected! Switching to {game}...")
+                switch_to_another_game(game)
                 activation_hit = True
             return True
     activation_hit = False
@@ -48,11 +65,12 @@ background_rect = background_image.get_rect()
 
 # List of border files
 border_files = ['src/mapBoundaries-Buildings.txt']
-activation_files = ['src/activationAreas.txt']
+activation_files = [('src/activationAreaHavener.txt', 'pushpuzzle')]
+# Add more border files as needed
 
 # Load borders from files
 borders = load_borders_from_files(border_files)
-activation_areas = load_borders_from_files(activation_files)
+activation_areas = load_activation_areas(activation_files)
 
 # Initial position of the circle
 x, y = WIDTH // 2, HEIGHT // 2
