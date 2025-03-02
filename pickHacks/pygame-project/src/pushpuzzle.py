@@ -135,73 +135,80 @@ grids = [
     ]
 ]
 
-puzzle = PushPuzzle([[list(row) for row in grid] for grid in grids])
+def main():
 
-# Initialize pygame
-pygame.init()
+    puzzle = PushPuzzle([[list(row) for row in grid] for grid in grids])
 
-# Set up display
-window_size = (800, 600)
-window = pygame.display.set_mode(window_size)
-pygame.display.set_caption('Push The Red Blocks Into The Green Targets')
+    # Initialize pygame
+    pygame.init()
 
-# Set up colors
-BLACK = (0, 0, 0)
-WHITE = (255, 255, 255)
-BLUE = (0, 0, 255)
-RED = (255, 0, 0)
-GREEN = (0, 255, 0)
+    # Set up display
+    window_size = (800, 600)
+    window = pygame.display.set_mode(window_size)
+    pygame.display.set_caption('Push The Red Blocks Into The Green Targets')
 
-# Set up fonts
-font = pygame.font.SysFont(None, 55)
+    # Set up colors
+    BLACK = (0, 0, 0)
+    WHITE = (255, 255, 255)
+    BLUE = (0, 0, 255)
+    RED = (255, 0, 0)
+    GREEN = (0, 255, 0)
 
-def draw_grid():
-    window.fill(WHITE)
-    for y, row in enumerate(puzzle.grid):
-        for x, cell in enumerate(row):
-            if cell == '#':
-                color = BLACK
-            elif cell == 'P':
-                color = BLUE
-            elif cell == 'B':
-                color = RED
-            elif cell == 'Y':
-                color = GREEN
-            else:
-                color = WHITE
-            pygame.draw.rect(window, color, pygame.Rect(x * 40, y * 40, 40, 40))
-            pygame.draw.rect(window, BLACK, pygame.Rect(x * 40, y * 40, 40, 40), 1)
+    # Set up fonts
+    font = pygame.font.SysFont(None, 55)
 
-    pygame.display.flip()
+    def draw_grid():
+        window.fill(WHITE)
+        for y, row in enumerate(puzzle.grid):
+            for x, cell in enumerate(row):
+                if cell == '#':
+                    color = BLACK
+                elif cell == 'P':
+                    color = BLUE
+                elif cell == 'B':
+                    color = RED
+                elif cell == 'Y':
+                    color = GREEN
+                else:
+                    color = WHITE
+                pygame.draw.rect(window, color, pygame.Rect(x * 40, y * 40, 40, 40))
+                pygame.draw.rect(window, BLACK, pygame.Rect(x * 40, y * 40, 40, 40), 1)
 
-# Main game loop
-running = True
-while running:
-    draw_grid()
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            running = False
-        elif event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_w:
-                puzzle.move('up')
-            elif event.key == pygame.K_s:
-                puzzle.move('down')
-            elif event.key == pygame.K_a:
-                puzzle.move('left')
-            elif event.key == pygame.K_d:
-                puzzle.move('right')
-            elif event.key == pygame.K_r:
-                puzzle.move('reset')
-            elif event.key == pygame.K_n:
-                puzzle.next_grid()
-            elif event.key == pygame.K_p:
-                puzzle.previous_grid()
-            elif event.key == pygame.K_ESCAPE:
+        pygame.display.flip()
+
+    # Main game loop
+    running = True
+    while running:
+        draw_grid()
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_w:
+                    puzzle.move('up')
+                elif event.key == pygame.K_s:
+                    puzzle.move('down')
+                elif event.key == pygame.K_a:
+                    puzzle.move('left')
+                elif event.key == pygame.K_d:
+                    puzzle.move('right')
+                elif event.key == pygame.K_r:
+                    puzzle.move('reset')
+                elif event.key == pygame.K_n:
+                    puzzle.next_grid()
+                elif event.key == pygame.K_p:
+                    puzzle.previous_grid()
+                elif event.key == pygame.K_ESCAPE:
+                    running = False
+
+        if puzzle.is_solved():
+            if not puzzle.next_grid():
                 running = False
 
-    if puzzle.is_solved():
-        if not puzzle.next_grid():
-            running = False
 
-pygame.quit()
-sys.exit()
+    if __name__ == "__main__":    
+        pygame.quit()
+        sys.exit()
+
+if __name__ == "__main__":
+    main()
