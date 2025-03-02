@@ -10,6 +10,47 @@ def load_borders_from_files(file_paths):
                 borders.append(pygame.Rect(x, y, width, height))
     return borders
 
+def check_collision_and_switch(rects, circle_rect, bg_x, bg_y):
+    for rect in rects:
+        adjusted_rect = rect.move(bg_x, bg_y)
+        if circle_rect.colliderect(adjusted_rect):
+            print("Collision detected! Switching to a different game...")
+            switch_to_another_game()
+            return True
+    return False
+
+def switch_to_another_game():
+    # Initialize Pygame for the secondary game
+    pygame.init()
+
+    # Constants for the secondary game
+    WIDTH, HEIGHT = 800, 600
+    BLUE = (0, 0, 255)
+    WHITE = (255, 255, 255)
+
+    # Set up the display for the secondary game
+    screen = pygame.display.set_mode((WIDTH, HEIGHT))
+    pygame.display.set_caption("Secondary Game")
+
+    # Main loop for the secondary game
+    running = True
+    while running:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+
+        # Fill the screen with blue color
+        screen.fill(BLUE)
+
+        # Update the display
+        pygame.display.flip()
+
+        # Cap the frame rate
+        pygame.time.Clock().tick(60)
+
+    # Quit Pygame for the secondary game
+    pygame.quit()
+
 # Initialize Pygame
 pygame.init()
 
@@ -30,10 +71,12 @@ background_image = pygame.image.load('images/sntMap-01.png')
 background_rect = background_image.get_rect()
 
 # List of border files
-border_files = ['src/mapBoundaries-Buildings.txt', 'src/anotherBorderFile.txt']
+border_files = ['src/mapBoundaries-Buildings.txt']
+activation_files = ['src/activationAreas.txt']
 
 # Load borders from files
 borders = load_borders_from_files(border_files)
+activation_areas = load_borders_from_files(activation_files)
 
 # Initial position of the circle
 x, y = WIDTH // 2, HEIGHT // 2
@@ -104,6 +147,10 @@ while running:
                 x += VELOCITY
             if keys[pygame.K_d]:
                 x -= VELOCITY
+
+    # Check for collisions with activation areas and switch game if needed
+    if check_collision_and_switch(activation_areas, circle_rect, bg_x, bg_y):
+        running = False
 
     # Draw the background image
     screen.blit(background_image, (bg_x, bg_y))

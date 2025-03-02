@@ -4,7 +4,7 @@ from tkinter import Tk, filedialog
 from concurrent.futures import ThreadPoolExecutor
 import os
 
-def generate_borders(image_path, target_color, tolerance=5):
+def generate_borders(image_path, target_color, tolerance=85):
     # Initialize Pygame
     pygame.init()
 
@@ -101,32 +101,44 @@ def filter_isolated_rects(rects, max_distance=3):
     return filtered
 
 def pick_color_from_image(image_path):
-    # Initialize Pygame
-    pygame.init()
+    while True:
+        # Initialize Pygame
+        pygame.init()
 
-    # Load the image
-    image = pygame.image.load(image_path)
-    screen = pygame.display.set_mode(image.get_size())
-    pygame.display.set_caption("Click to select color")
+        # Load the image
+        image = pygame.image.load(image_path)
+        screen = pygame.display.set_mode(image.get_size())
+        pygame.display.set_caption("Click to select color")
 
-    # Display the image
-    screen.blit(image, (0, 0))
-    pygame.display.flip()
+        # Display the image
+        screen.blit(image, (0, 0))
+        pygame.display.flip()
 
-    # Wait for the user to click on the image
-    running = True
-    color = None
-    while running:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                running = False
-            elif event.type == pygame.MOUSEBUTTONDOWN:
-                x, y = event.pos
-                color = screen.get_at((x, y))[:3]
-                running = False
+        # Wait for the user to click on the image
+        running = True
+        color = None
+        while running:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+                elif event.type == pygame.MOUSEBUTTONDOWN:
+                    x, y = event.pos
+                    color = screen.get_at((x, y))[:3]
+                    running = False
 
-    pygame.quit()
-    return color
+        # Display the selected color
+        screen.fill(color)
+        pygame.display.flip()
+
+        # Ask the user if it is the desired color
+        print(f"Selected color: {color}")
+        response = input("Is this the desired color? (y/n): ").strip().lower()
+        if response == 'y':
+            pygame.quit()
+            return color
+        else:
+            pygame.quit()
 
 if __name__ == "__main__":
     if len(sys.argv) < 2 or len(sys.argv) > 3:
