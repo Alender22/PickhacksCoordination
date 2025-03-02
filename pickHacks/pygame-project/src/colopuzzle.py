@@ -31,6 +31,7 @@ class ColorPuzzle:
         self.current_color = self.get_random_color()
         self.color_history = []
         self.shuffled = []
+        self.square_locations = []
 
     def get_random_color(self):
         return (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
@@ -59,9 +60,21 @@ class ColorPuzzle:
 
         # Draw small squares of each color in the color history in random order
         for i, color in enumerate(self.shuffled):
-            pygame.draw.rect(screen, color, (10 + i * (SQUARE_SIZE + 5), HEIGHT - SQUARE_SIZE - 10, SQUARE_SIZE, SQUARE_SIZE))
+            square_rect = pygame.Rect(10 + i * (SQUARE_SIZE + 5), HEIGHT - SQUARE_SIZE - 10, SQUARE_SIZE, SQUARE_SIZE)
+            pygame.draw.rect(screen, color, square_rect)
+            self.square_locations.append({'start': square_rect.topleft, 'end': square_rect.bottomright, 'color': color})
+        pygame.draw.circle(screen, RED, (self.x, self.y), RADIUS)
 
-        pygame.draw.circle(screen, RED, (x, y), RADIUS)
+    def check_collision(self):
+        circle_rect = pygame.Rect(self.x - RADIUS, self.y - RADIUS, RADIUS * 2, RADIUS * 2)
+        for i, location in enumerate(self.square_locations):
+            square_rect = pygame.Rect(location['start'][0], location['start'][1], SQUARE_SIZE, SQUARE_SIZE)
+            if square_rect.colliderect(circle_rect):
+                if i < len(self.shuffled):
+                    self.shuffled.pop(i)
+                if i < len(self.square_locations):
+                    self.square_locations.pop(i)
+                break
 
 # Main game loop
 puzzle = ColorPuzzle()
@@ -94,19 +107,18 @@ while running:
 
     keys = pygame.key.get_pressed()
     if keys[pygame.K_w]:
-        y -= VELOCITY
+        puzzle.y -= VELOCITY
     if keys[pygame.K_s]:
-        y += VELOCITY
+        puzzle.y += VELOCITY
     if keys[pygame.K_a]:
-        x -= VELOCITY
+        puzzle.x -= VELOCITY
     if keys[pygame.K_d]:
-        x += VELOCITY
+        puzzle.x += VELOCITY
 
     puzzle.x = max(RADIUS, min(WIDTH - RADIUS, puzzle.x))
     puzzle.y = max(RADIUS, min(HEIGHT - RADIUS, puzzle.y))
-
-    #pygame.draw.circle(screen, RED, (x, y), RADIUS)'''
     
+    puzzle.check_collision()
     puzzle.draw_color_history()
 
     pygame.display.flip()
