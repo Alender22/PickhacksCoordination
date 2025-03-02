@@ -17,7 +17,7 @@ WHITE = (255, 255, 255)
 
 # Set up the display
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
-pygame.display.set_caption("Move to the colors in the order they appeared")
+pygame.display.set_caption("Move To The Colors In The Order They Appeared")
 
 # Initial position of the circle
 x, y = WIDTH // 2, HEIGHT // 2
